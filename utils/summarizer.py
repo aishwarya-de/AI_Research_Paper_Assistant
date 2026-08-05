@@ -10,29 +10,48 @@ from utils.prompts import (
     VIVA_PROMPT,
 )
 
-# Load environment variables from the .env file
 load_dotenv()
 
-# Read the OpenAI API key
-api_key = os.getenv("OPENAI_API_KEY")
+api_key = os.getenv("OPENROUTER_API_KEY")
 
-# Create the OpenAI client
-client = OpenAI(api_key=api_key)
+client = OpenAI(
+    api_key=api_key,
+    base_url="https://openrouter.ai/api/v1",
+)
 
-
-def generate_summary(paper_text):
+def generate_response(prompt_template, paper_text):
     """
-    Generates an AI summary for the given research paper.
+    Sends a prompt to the OpenAI model and returns the generated text.
     """
 
-    # Insert the paper text into the prompt template
-    prompt = SUMMARY_PROMPT.format(text=paper_text)
+    # Replace {text} with the actual research paper
+    prompt = prompt_template.format(text=paper_text)
 
-    # Send the prompt to the OpenAI model
+    # Send the request to OpenAI
     response = client.responses.create(
-        model="gpt-5.5",
+        model="nvidia/nemotron-3-ultra-550b-a55b:free",
         input=prompt,
     )
 
     # Return only the generated text
     return response.output_text
+def generate_summary(paper_text):
+    """
+    Generates an AI summary for the given research paper.
+    """
+
+    return generate_response(SUMMARY_PROMPT, paper_text)
+
+def generate_key_points(paper_text):
+    """
+    Extracts the key points from the given research paper.
+    """
+
+    return generate_response(KEY_POINTS_PROMPT, paper_text)
+
+def generate_research_gaps(paper_text):
+    """
+    Identifies research gaps in the given research paper.
+    """
+
+    return generate_response(RESEARCH_GAPS_PROMPT, paper_text)
