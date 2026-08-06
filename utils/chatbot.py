@@ -1,59 +1,99 @@
-from openai import OpenAI
-from dotenv import load_dotenv
-import os
+import streamlit as st
+from sentence_transformers import SentenceTransformer
+from utils.model_loader import get_embedding_model
 
+def search_similar_chunks(question, top_k=3):
+    model = get_embedding_model()
+    question_embedding = model.encode([question])
+@st.cache_resource
+def load_model():
+    return SentenceTransformer("all-MiniLM-L6-v2")
+import os
+import pickle
+
+import faiss
+import numpy as np
+from dotenv import load_dotenv
+from openai import OpenAI
+from sentence_transformers import SentenceTransformer
+
+# Load environment variables
 load_dotenv()
 
+# Get API key
 api_key = os.getenv("OPENROUTER_API_KEY")
 
+# Initialize OpenRouter client
 client = OpenAI(
     api_key=api_key,
     base_url="https://openrouter.ai/api/v1",
 )
-import faiss
-import pickle
-import numpy as np
-from sentence_transformers import SentenceTransformer
-model = SentenceTransformer("all-MiniLM-L6-v2")
+
+# Load the Sentence Transformer model
+
+
+
 def load_index():
+    """
+    Load the saved FAISS index.
+    """
     return faiss.read_index("faiss_index.bin")
+
+
 def load_chunks():
+    """
+    Load the saved text chunks.
+    """
     with open("chunks.pkl", "rb") as f:
         return pickle.load(f)
+
+
 def search_similar_chunks(question, top_k=3):
-    # Load the FAISS index
+    """
+    Search the FAISS index and return the most relevant text chunks.
+    """
+
+    # Load FAISS index
     index = load_index()
 
-    # Load the original text chunks
+    # Load original chunks
     chunks = load_chunks()
 
-    # Convert the user's question into an embedding
+    # Convert question into embedding
+    model = load_model()
     question_embedding = model.encode([question])
 
-    # Search the FAISS index
+    # Search similar vectors
     distances, indices = index.search(
         np.array(question_embedding, dtype=np.float32),
         top_k
     )
 
-    # Retrieve the matching text chunks
+    # Retrieve matching chunks
     relevant_chunks = [chunks[i] for i in indices[0]]
 
     return relevant_chunks
+
+
 def ask_question(question):
-    # Retrieve the most relevant chunks
+    """
+    Answer a user question using Retrieval-Augmented Generation (RAG).
+    """
+
+    # Retrieve relevant chunks
     relevant_chunks = search_similar_chunks(question)
 
-    # Combine them into one context
+    # Convert list into a single context string
     context = "\n\n".join(relevant_chunks)
 
-    # Prompt for the chatbot
+    # Create prompt
     prompt = f"""
 You are an AI Research Paper Assistant.
 
 Answer the user's question ONLY using the research paper context below.
 
-If the answer is not present in the context, reply:
+If the answer is not present in the context, reply exactly:
+
 "I could not find the answer in the uploaded research paper."
 
 Research Paper Context:
@@ -63,10 +103,15 @@ Question:
 {question}
 """
 
-    # Send to the LLM
-    response = client.responses.create(
-        model="nvidia/nemotron-3-ultra-550b-a55b:free",
-        input=prompt,
-    )
+    try:
+        # Send prompt to OpenRouter
+        response = client.responses.create(
+            model="nvidia/nemotron-3-ultra-550b-a55b:free",
+            input=prompt,
+        )
 
-    return response.output_text
+        # Return generated answer
+        return response.output_text
+
+    except Exception as e:
+        return f"Error: {str(e)}"
