@@ -1,3 +1,15 @@
+from openai import OpenAI
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+api_key = os.getenv("OPENROUTER_API_KEY")
+
+client = OpenAI(
+    api_key=api_key,
+    base_url="https://openrouter.ai/api/v1",
+)
 import faiss
 import pickle
 import numpy as np
@@ -29,4 +41,32 @@ def search_similar_chunks(question, top_k=3):
 
     return relevant_chunks
 def ask_question(question):
-    pass
+    # Retrieve the most relevant chunks
+    relevant_chunks = search_similar_chunks(question)
+
+    # Combine them into one context
+    context = "\n\n".join(relevant_chunks)
+
+    # Prompt for the chatbot
+    prompt = f"""
+You are an AI Research Paper Assistant.
+
+Answer the user's question ONLY using the research paper context below.
+
+If the answer is not present in the context, reply:
+"I could not find the answer in the uploaded research paper."
+
+Research Paper Context:
+{context}
+
+Question:
+{question}
+"""
+
+    # Send to the LLM
+    response = client.responses.create(
+        model="nvidia/nemotron-3-ultra-550b-a55b:free",
+        input=prompt,
+    )
+
+    return response.output_text
