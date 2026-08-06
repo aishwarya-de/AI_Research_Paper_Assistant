@@ -23,24 +23,61 @@ st.set_page_config(
 st.markdown("""
 <style>
 
+/* Main Background */
 .stApp{
-    background:#F4F8FB;
+    background-color: #F8FAFC;
+    color: #1F2937;
 }
 
+/* Sidebar */
 [data-testid="stSidebar"]{
-    background:#E8F0FE;
+    background-color: #E2E8F0;
 }
 
+/* Sidebar Text */
+[data-testid="stSidebar"] *{
+    color: #1F2937;
+}
+
+/* Main Title */
 h1{
-    color:#1F4E79;
+    color: #0F172A;
+    text-align: center;
+    font-size: 42px;
+    font-weight: bold;
 }
 
-h2,h3{
-    color:#2C3E50;
+/* Subheadings */
+h2, h3{
+    color: #1E3A8A;
 }
 
+/* Normal Text */
+p, label, div{
+    color: #1F2937;
+}
+
+/* Text Input */
+.stTextInput input{
+    color: #1F2937;
+    background-color: white;
+}
+
+/* Text Area */
 textarea{
-    font-size:15px;
+    color: #1F2937 !important;
+    background-color: white !important;
+}
+
+/* Buttons */
+.stButton>button{
+    background-color: #2563EB;
+    color: white;
+    border-radius: 10px;
+}
+
+.stButton>button:hover{
+    background-color: #1D4ED8;
 }
 
 </style>
@@ -113,14 +150,11 @@ if uploaded_file is not None:
 
             with st.spinner("Processing Research Paper..."):
 
-                # Extract Text
-                text = extract_text_from_pdf(file_path)
+               text = extract_text_from_pdf(file_path)
 
-                # Build Embeddings + FAISS Index
-                process_document(text)
+               process_document(text)
 
-                # AI Analysis
-                results = analyze_paper(text)
+               results = analyze_paper(text)
 
             st.success(
                 f"{uploaded_file.name} processed successfully!"
