@@ -13,18 +13,20 @@ def extract_text_from_pdf(pdf_path):
     """
 
     try:
-        # Open PDF
+        # Open the PDF
         doc = fitz.open(pdf_path)
 
+        # Store extracted text
         extracted_text = ""
 
         # Read every page
         for page in doc:
             extracted_text += page.get_text()
 
+        # Close the PDF
         doc.close()
 
-        # Check if text was extracted
+        # Check if any text was extracted
         if extracted_text.strip() == "":
             raise ValueError("No extractable text found in the PDF.")
 
@@ -32,3 +34,25 @@ def extract_text_from_pdf(pdf_path):
 
     except Exception as e:
         raise Exception(f"Error reading PDF: {e}")
+
+
+def get_pdf_page_count(pdf_path):
+    """
+    Returns the total number of pages in the PDF.
+
+    Args:
+        pdf_path (str): Path to the PDF file.
+
+    Returns:
+        int: Number of pages in the PDF.
+    """
+
+    try:
+        doc = fitz.open(pdf_path)
+        page_count = len(doc)
+        doc.close()
+
+        return page_count
+
+    except Exception as e:
+        raise Exception(f"Error counting PDF pages: {e}")
