@@ -15,6 +15,12 @@ st.set_page_config(
     page_icon="📄",
     layout="wide"
 )
+# =====================================================
+# Chat History
+# =====================================================
+
+if "messages" not in st.session_state:
+    st.session_state.messages = []
 
 # =====================================================
 # Custom CSS
@@ -229,8 +235,8 @@ if uploaded_file is not None:
 
             st.subheader("💬 Chat with Research Paper")
 
-            question = st.text_input(
-                "Ask anything about this research paper:"
+            question = st.chat_input(
+                "Ask anything about this research paper..."
             )
 
             if question:
@@ -248,6 +254,5 @@ if uploaded_file is not None:
 
 
         except Exception as e:
-            st.error(f"❌ {e}")
-
+          st.error(f"❌ {e}")  
         
