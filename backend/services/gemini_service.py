@@ -114,5 +114,10 @@ Rules:
             except Exception as fallback_err:
                 return f"❌ **Error generating response from Gemini API**: {str(e)}"
 
+# Backward-compatible adapter used by older RAG service imports.
+def answer_rag_question(question: str, retrieved_chunks: List[Dict[str, Any]]) -> str:
+    """Return the same answer shape as the older RAG service adapter contract."""
+    return gemini_service.generate_rag_answer(question, retrieved_chunks)
+
 # Global service instance
 gemini_service = GeminiService()
