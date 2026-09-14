@@ -27,12 +27,12 @@ A production-grade web application for AI-powered research paper analysis, retri
                                               |
                                               v
 +-----------------------------------------------------------------------------------+
-| FastAPI Backend                                                                    |
+| Node.js Express Backend                                                            |
 |                                                                                   |
 |  +--------------------+      +--------------------+      +---------------------+  |
-|  | PyMuPDF Extractor  | ---> | Chunk & Embed      | ---> | FAISS Vector Store  |  |
-|  +--------------------+      | (SentenceTransf.)  |      +----------+----------+  |
-|                              +--------------------+                 |             |
+|  | PDF Extractor      | ---> | Chunk & Embed      | ---> | In-memory FAISS-like|  |
+|  +--------------------+      | (PDF parse)        |      | Vector Store        |  |
+|                              +--------------------+      +----------+----------+  |
 |                                                                Top-K Retrieval    |
 |                                                                     |             |
 |                                                                     v             |
@@ -51,16 +51,11 @@ A production-grade web application for AI-powered research paper analysis, retri
 
 ### Setup Instructions
 
-1. **Backend Setup**:
+1. **Node.js Backend Setup**:
    ```bash
-   cd backend
-   python -m venv venv
-   # On Windows:
-   .\venv\Scripts\activate
-   # On Linux/macOS:
-   # source venv/bin/activate
-   pip install -r requirements.txt
-   uvicorn main:app --reload --port 8000
+   cd backend-node
+   npm install
+   npm start
    ```
 
 2. **Frontend Setup**:
@@ -71,9 +66,11 @@ A production-grade web application for AI-powered research paper analysis, retri
    ```
 
 3. **Environment Configuration**:
-   Create `.env` in the root directory:
+   Create `.env` in the project root or inside the Node backend folder:
    ```env
    GEMINI_API_KEY=your_gemini_api_key_here
+   GEMINI_MODEL=gemini-2.5-flash
+   PORT=8000
    ```
 
 ## Deployment Notes
